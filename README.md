@@ -1,18 +1,18 @@
 # Slimme Meter (DSMR v5) Reader + Dashboard
 
-Requirementsss:
+Requirements:
 
-- Dash (inc. Plotly)
-- Pandas
-- Python 3.6.6
+- pandas==1.5.0
+- dash==2.6.2
+- pyserial==3.5
 - Raspberry Pi connected to DSMR via USB
 
 Installation / deployment:
 
-- put read.py and dashboard.py on your Raspberry Pi
-- create a virtual environment that has the packages above installed and activate it
-- schedule a task with Cron that periodically run reads.py, so that data is extracted from the DSMR (via UBS) and stored. One way to do this is to open crontab by means of `crontab -e` and insert the following task `0 * * * * python <path to read.py> >/dev/null 2>&1`. With this task data is retrieved every hour.
-- run the dashboard with a nohup command (and access it via the IP of your Rpi & port 8050)
+- clone the repo on your Raspberry Pi
+- create a virtual environment that has the packages in the `requirements.txt` installed
+- schedule a Cron task that periodically activates the virtual environment and runs `get_data.py`, so that data is extracted from the DSMR (via UBS) and stored.
+- schedule a Cron task that periodically refreshes/restarts the dashboard (see `restart_script.sh` for an example of such a script).
 
 
 ![alt text](https://github.com/MBKraus/Slimme_meter_reader-dashboard/blob/master/dasbhoard.png)

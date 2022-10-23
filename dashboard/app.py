@@ -1,53 +1,22 @@
-
-import datetime
-import json
+import pandas as pd
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
 import plotly.graph_objs as go
 
-with open('stored.json') as data_file:
-	obs = json.load(data_file)
+data_path = '<absolute to preprocessed data csv>'
+price_e = 0.42316   #price electricity
+price_g = 1.77187   #price gas
 
-# load data
-
-df = pd.DataFrame(obs)
-
-# Electricity; ffil 0 meter readings and calculate consumption  + corresponding costs of consumption
-
-df['meter_el'] = df['meter_el'].replace(to_replace=0, method='ffill')
-df['el_consumed'] = df['meter_el'].diff()
-
-df['meter_eh'] = df['meter_eh'].replace(to_replace=0, method='ffill')
-df['eh_consumed'] = df['meter_eh'].diff()
-
-df['e_total'] = df['eh_consumed']+df['el_consumed']
-df['e_total'] = df['e_total'].astype(float)
-
-df['e_total_cost'] =  df['e_total'].apply(lambda x: round(x*0.218, 3))
-
-# Gas; ffil 0 meter readings and calculate consumption  + corresponding costs of consumption
-
-df['gas'] = df['gas'].replace(to_replace=0, method='ffill')
-df['gas_consumed'] = df['gas'].diff()
-df['gas_consumed'] = df['gas_consumed'].astype(float)
-
-df['gas_cost'] =  df['gas_consumed'].apply(lambda x: round(x*0.6512, 3))
-
-# Formate date_time, day and hour
-
-df['date_time'] = pd.to_datetime(df['date_time'], format='%d-%m-%Y %H:%M:%S')
-df['day'] =  df['date_time'].apply(lambda x: x.strftime('%A'))
-df['hour'] =  df['date_time'].apply(lambda x: x.strftime('%H'))
+df = pd.read_csv(data_path)
 
 # Calculate daily consumption + corresponding costs of consumption
 
 totals_e_date = df['e_total'].groupby(df['date']).sum()
-totals_e_date_cost = totals_e_date.apply(lambda x: round(x*0.218, 3))
+totals_e_date_cost = totals_e_date.apply(lambda x: round(x*price_e, 3))
 
 totals_g_date = df['gas_consumed'].groupby(df['date']).sum()
-totals_g_date_cost = totals_g_date.apply(lambda x: round(x*0.6512, 3))
+totals_g_date_cost = totals_g_date.apply(lambda x: round(x*price_g, 3))
 
 # Calculate hourly consumption + corresponding costs of consumption
 
@@ -64,7 +33,6 @@ totals_g_day = df['gas_consumed'].groupby(df['day']).sum()
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
 
 app.layout = html.Div([
     html.Div([
